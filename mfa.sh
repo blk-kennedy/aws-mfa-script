@@ -58,6 +58,6 @@ AWS_SESSION_TOKEN=$(echo ${RESULT} | cut -d" " -f5)
 
 MFA_PROFILE="${1}-mfa"
 
-aws configure set profile.${MFA_PROFILE}.aws_secret_access_key ${AWS_ACCESS_KEY_ID}
+aws configure set profile.${MFA_PROFILE}.aws_access_key_id ${AWS_ACCESS_KEY_ID}
 aws configure set profile.${MFA_PROFILE}.aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
 aws configure set profile.${MFA_PROFILE}.aws_session_token ${AWS_SESSION_TOKEN}
