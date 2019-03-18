@@ -47,6 +47,17 @@ echo "MFA ARN: $ARN_OF_MFA"
 echo "MFA Token Code: $MFA_TOKEN_CODE"
 
 echo "Your Temporary Creds:"
-aws --profile $AWS_CLI_PROFILE sts get-session-token --duration 129600 \
-  --serial-number $ARN_OF_MFA --token-code $MFA_TOKEN_CODE --output text \
-  | awk '{printf("export AWS_ACCESS_KEY_ID=\"%s\"\nexport AWS_SECRET_ACCESS_KEY=\"%s\"\nexport AWS_SESSION_TOKEN=\"%s\"\nexport AWS_SECURITY_TOKEN=\"%s\"\n",$2,$4,$5,$5)}' | tee ~/aws-mfa-script/.token_file
+
+RESULT=$(aws --profile $AWS_CLI_PROFILE sts get-session-token --duration 129600 --serial-number $ARN_OF_MFA --token-code $MFA_TOKEN_CODE --output text)
+
+echo ${RESULT} | awk '{printf("export AWS_ACCESS_KEY_ID=\"%s\"\nexport AWS_SECRET_ACCESS_KEY=\"%s\"\nexport AWS_SESSION_TOKEN=\"%s\"\nexport AWS_SECURITY_TOKEN=\"%s\"\n",$2,$4,$5,$5)}' | tee ~/aws-mfa-script/.token_file
+
+AWS_ACCESS_KEY_ID=$(echo ${RESULT} | cut -d" " -f2)
+AWS_SECRET_ACCESS_KEY=$(echo ${RESULT} | cut -d" " -f4)
+AWS_SESSION_TOKEN=$(echo ${RESULT} | cut -d" " -f5)
+
+MFA_PROFILE="${1}-mfa"
+
+aws configure set profile.${MFA_PROFILE}.aws_access_key_id ${AWS_ACCESS_KEY_ID}
+aws configure set profile.${MFA_PROFILE}.aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+aws configure set profile.${MFA_PROFILE}.aws_session_token ${AWS_SESSION_TOKEN}
